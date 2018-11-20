@@ -305,17 +305,17 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
                 # Limit search results to files in the current folder or any
                 # nested folder.
                 file_qs = File.objects.filter(
-                    folder__in=folder.get_descendants(include_self=True))
+                    folder__in=folder.get_descendants(include_self=True)).order_by('original_filename')
             else:
                 folder_qs = self.get_queryset(request)
                 file_qs = File.objects.all()
             folder_qs = self.filter_folder(folder_qs, search_terms)
-            file_qs = self.filter_file(file_qs, search_terms)
+            file_qs = self.filter_file(file_qs, search_terms).order_by('original_filename')
 
             show_result_count = True
         else:
             folder_qs = folder.children.all()
-            file_qs = folder.files.all()
+            file_qs = folder.files.all().order_by('original_filename')
             show_result_count = False
 
         folder_qs = folder_qs.order_by('name')
@@ -344,8 +344,8 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
         if folder.is_root:
             folder_qs = folder_qs.exclude(**root_exclude_kw)
 
-        folder_children += folder_qs
-        folder_files += file_qs
+        # folder_children += folder_qs
+        # folder_files += file_qs
 
         try:
             permissions = {
@@ -360,7 +360,8 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
         if order_by is None or len(order_by) == 0:
             folder_files.sort()
 
-        items = folder_children + folder_files
+        # items = folder_children + folder_files
+        items = folder_qs + file_qs
         paginator = Paginator(items, FILER_PAGINATE_BY)
 
         # Are we moving to clipboard?
