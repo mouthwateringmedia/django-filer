@@ -297,28 +297,28 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
         # Limit search results to current folder.
         limit_search_to_folder = request.GET.get('limit_search_to_folder',
                                                  False) in (True, 'on')
-
+        folders_qs = None
         if len(search_terms) > 0:
             if folder and limit_search_to_folder and not folder.is_root:
                 # Do not include current folder itself in search results.
-                folder_qs = folder.get_descendants(include_self=False)
+                # folder_qs = folder.get_descendants(include_self=False)
                 # Limit search results to files in the current folder or any
                 # nested folder.
                 file_qs = File.objects.filter(
                     folder__in=folder.get_descendants(include_self=True)).order_by('original_filename')
             else:
-                folder_qs = self.get_queryset(request)
+                # folder_qs = self.get_queryset(request)
                 file_qs = File.objects.all()
-            folder_qs = self.filter_folder(folder_qs, search_terms)
+            # folder_qs = self.filter_folder(folder_qs, search_terms)
             file_qs = self.filter_file(file_qs, search_terms).order_by('original_filename')
 
             show_result_count = True
         else:
             folder_qs = folder.children.all()
+            folder_qs = folder_qs.order_by('name')
             file_qs = folder.files.all().order_by('original_filename')
             show_result_count = False
 
-        folder_qs = folder_qs.order_by('name')
         order_by = request.GET.get('order_by', None)
         if order_by is not None:
             order_by = order_by.split(',')
@@ -341,7 +341,7 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
             folder_qs = folder_qs.filter(models.Q(id__in=perms) | models.Q(owner=request.user))
         else:
             root_exclude_kw.pop('parent__id__in')
-        if folder.is_root:
+        if folder.is_root and folder_qs:
             folder_qs = folder_qs.exclude(**root_exclude_kw)
 
         # folder_children += folder_qs
@@ -361,7 +361,10 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
             folder_files.sort()
 
         # items = folder_children + folder_files
-        items = folder_qs | file_qs
+        if folder_qs:
+            items = folder_qs | file_qs
+        else:
+            items = file_qs
         paginator = Paginator(items, FILER_PAGINATE_BY)
 
         # Are we moving to clipboard?
