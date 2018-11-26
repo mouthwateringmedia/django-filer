@@ -297,7 +297,7 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
         # Limit search results to current folder.
         limit_search_to_folder = request.GET.get('limit_search_to_folder',
                                                  False) in (True, 'on')
-        folders_qs = None
+        folder_qs = None
         if len(search_terms) > 0:
             if folder and limit_search_to_folder and not folder.is_root:
                 # Do not include current folder itself in search results.
