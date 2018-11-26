@@ -6,6 +6,14 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def forwards_func(apps, schema_editor):
+    Folder = apps.get_model('filer', 'Folder')
+    ContentType = apps.get_model('contenttypes', 'ContentType')
+
+    new_ct = ContentType.objects.get_for_model(Folder)
+    Folder.objects.filter(polymorphic_ctype__isnull=True).update(polymorphic_ctype=new_ct)
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -19,4 +27,5 @@ class Migration(migrations.Migration):
             name='polymorphic_ctype',
             field=models.ForeignKey(editable=False, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='polymorphic_filer.folder_set+', to='contenttypes.ContentType'),
         ),
+        migrations.RunPython(forwards_func, migrations.RunPython.noop),
     ]
