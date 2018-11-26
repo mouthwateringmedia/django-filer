@@ -361,7 +361,7 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
             folder_files.sort()
 
         # items = folder_children + folder_files
-        items = folder_qs + file_qs
+        items = folder_qs | file_qs
         paginator = Paginator(items, FILER_PAGINATE_BY)
 
         # Are we moving to clipboard?
