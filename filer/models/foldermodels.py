@@ -18,13 +18,20 @@ from ..utils.compatibility import (
     reverse,
 )
 
+try:
+    from polymorphic.models import PolymorphicModel
+    from polymorphic.managers import PolymorphicManager
+except ImportError:
+    # django-polymorphic < 0.8
+    from polymorphic import PolymorphicModel, PolymorphicManager
 
-class FolderManager(models.Manager):
+
+class FolderManager(PolymorphicManager):
     def with_bad_metadata(self):
         return self.get_query_set().filter(has_all_mandatory_data=False)
 
 
-class FolderPermissionManager(models.Manager):
+class FolderPermissionManager(PolymorphicManager):
     """
     Theses methods are called by introspection from "has_generic_permisison" on
     the folder model.
@@ -86,7 +93,7 @@ class FolderPermissionManager(models.Manager):
 
 
 @python_2_unicode_compatible
-class Folder(models.Model, mixins.IconsMixin):
+class Folder(PolymorphicModel, mixins.IconsMixin):
     """
     Represents a Folder that things (files) can be put into. Folders are *NOT*
     mirrored in the Filesystem and can have any unicode chars as their name.

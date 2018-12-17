@@ -30,7 +30,7 @@ setup(
         'easy-thumbnails>=2,<3.0',
         'django-mptt>=0.6,<1.0',  # the exact version depends on Django
         'django_polymorphic>=0.7,<2.1',
-        'Unidecode>=0.04,<1.1',
+        'Unidecode>=1.0,<1.1',
     ),
     include_package_data=True,
     zip_safe=False,
