@@ -7,6 +7,7 @@ import warnings
 from django import forms
 from django.contrib.admin.sites import site
 from django.contrib.admin.widgets import ForeignKeyRawIdWidget
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.template.loader import render_to_string
 from django.utils.http import urlencode
@@ -23,7 +24,7 @@ logger = logging.getLogger(__name__)
 class AdminFileWidget(ForeignKeyRawIdWidget):
     choices = None
 
-    def render(self, name, value, attrs=None):
+    def render(self, name, value, attrs=None, renderer=None):
         obj = self.obj_for_value(value)
         css_id = attrs.get('id', 'id_image_x')
         related_url = None
@@ -73,10 +74,16 @@ class AdminFileWidget(ForeignKeyRawIdWidget):
         return '&nbsp;<strong>%s</strong>' % truncate_words(obj, 14)
 
     def obj_for_value(self, value):
-        try:
-            key = self.rel.get_related_field().name
-            obj = self.rel.to._default_manager.get(**{key: value})
-        except:
+        if value:
+            try:
+                key = self.rel.get_related_field().name
+                if LTE_DJANGO_1_8:
+                    obj = self.rel.to._default_manager.get(**{key: value})
+                else:
+                    obj = self.rel.model._default_manager.get(**{key: value})
+            except ObjectDoesNotExist:
+                obj = None
+        else:
             obj = None
         return obj
 
