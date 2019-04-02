@@ -572,9 +572,12 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
                         selected_folders.append(pk[7:])
 
                 # Perform the action only on the selected objects
-                files_queryset = files_queryset.filter(pk__in=selected_files)
-                folders_queryset = folders_queryset.filter(
-                    pk__in=selected_folders)
+                if files_queryset:
+                    files_queryset = files_queryset.filter(pk__in=selected_files)
+                if folders_queryset:
+                    folders_queryset = folders_queryset.filter(
+                        pk__in=selected_folders)
+                        
 
             response = func(self, request, files_queryset, folders_queryset)
 
@@ -652,7 +655,8 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
         Action which enables or disables permissions for selected files and
         files in selected folders to clipboard (set them private or public).
         """
-
+        if not folders_queryset:
+            folders_queryset = []
         if not self.has_change_permission(request):
             raise PermissionDenied
 
@@ -717,7 +721,8 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
         """
         opts = self.model._meta
         app_label = opts.app_label
-
+        if not folders_queryset:
+            folders_queryset = []
         # Check that the user has delete permission for the actual model
         if not self.has_delete_permission(request):
             raise PermissionDenied
@@ -732,10 +737,24 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
         # permissions.
         # TODO: Check if permissions are really verified
         using = router.db_for_write(self.model)
-        deletable_files, model_count_files, perms_needed_files, protected_files = get_deleted_objects(files_queryset, files_queryset.model._meta, request.user, self.admin_site, using)
-        deletable_folders, model_count_folder, perms_needed_folders, protected_folders = get_deleted_objects(folders_queryset, folders_queryset.model._meta, request.user, self.admin_site, using)
-        all_protected.extend(protected_files)
-        all_protected.extend(protected_folders)
+        deletable_files = []
+        deletable_folders = []
+        model_count_files = dict()
+        model_count_folders = dict()
+        perms_needed_files = set()
+        perms_needed_folders = set()
+        protected_files = []
+        protected_folders = []
+        if files_queryset:
+            deletable_files, model_count_files, perms_needed_files, protected_files = get_deleted_objects(files_queryset, files_queryset.model._meta, request.user, self.admin_site, using)
+            all_protected.extend(protected_files)
+        if folders_queryset:
+            deletable_folders, model_count_folder, perms_needed_folders, protected_folders = get_deleted_objects(folders_queryset, folders_queryset.model._meta, request.user, self.admin_site, using)
+            all_protected.extend(protected_folders)
+        # deletable_files, model_count_files, perms_needed_files, protected_files = get_deleted_objects(files_queryset, files_queryset.model._meta, request.user, self.admin_site, using)
+        # deletable_folders, model_count_folder, perms_needed_folders, protected_folders = get_deleted_objects(folders_queryset, folders_queryset.model._meta, request.user, self.admin_site, using)
+        # all_protected.extend(protected_files)
+        # all_protected.extend(protected_folders)
 
         all_deletable_objects = [deletable_files, deletable_folders]
         all_perms_needed = perms_needed_files.union(perms_needed_folders)
@@ -745,7 +764,12 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
         if request.POST.get('post'):
             if all_perms_needed:
                 raise PermissionDenied
-            n = files_queryset.count() + folders_queryset.count()
+            n = 0
+            if files_queryset:
+                n = n + files_queryset.count()
+            if folders_queryset:
+                n = n + folders_queryset.count()
+            # n = folders_queryset.count() + files_queryset.count()
             if n:
                 # delete all explicitly selected files
                 for f in files_queryset:
