@@ -5,11 +5,13 @@ from django import forms
 from django.utils.translation import string_concat
 from django.utils.translation import ugettext as _
 from django.utils.translation import ugettext_lazy
+from django.contrib import admin
 
 from ..settings import FILER_IMAGE_MODEL
 from ..thumbnail_processors import normalize_subject_location
 from ..utils.loader import load_model
 from .fileadmin import FileAdmin
+from ..models.abstract import Callout
 
 Image = load_model(FILER_IMAGE_MODEL)
 
@@ -88,8 +90,14 @@ class ImageAdminForm(forms.ModelForm):
         )
 
 
+class CalloutInline(admin.StackedInline):
+    model = Callout
+    extra = 1
+
+
 class ImageAdmin(FileAdmin):
     form = ImageAdminForm
+    inlines = [CalloutInline]
 
 
 ImageAdmin.fieldsets = ImageAdmin.build_fieldsets(
@@ -99,5 +107,8 @@ ImageAdmin.fieldsets = ImageAdmin.build_fieldsets(
             'fields': ('subject_location',),
             'classes': ('collapse',),
         }),
+        (_('Callout Points'), {
+            'fields'('')
+        })
     )
 )

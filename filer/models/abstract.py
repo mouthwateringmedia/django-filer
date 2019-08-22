@@ -186,3 +186,9 @@ class BaseImage(File):
         abstract = True
         if GTE_DJANGO_1_10:
             default_manager_name = 'objects'
+
+
+class Callout(models.Model):
+    image = models.ForeignKey(BaseImage, on_delete=models.CASCADE)
+    callout_coordinates = models.CharField(max_length=64, blank=True)
+    callout_text = models.CharField(max_length=50, blank=True)
