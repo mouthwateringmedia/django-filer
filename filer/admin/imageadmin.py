@@ -83,7 +83,7 @@ class ImageAdminForm(forms.ModelForm):
 
     class Media(object):
         css = {
-            # 'all': (settings.MEDIA_URL + 'filer/css/focal_point.css',)
+            'all': (settings.MEDIA_URL + 'filer/css/focal_point.css',)
         }
         js = (
 
