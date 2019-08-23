@@ -106,8 +106,5 @@ ImageAdmin.fieldsets = ImageAdmin.build_fieldsets(
         (_('Subject location'), {
             'fields': ('subject_location',),
         }),
-        (_('Callout Points'), {
-            'fields': ('callout_coordinates'),
-        })
     )
 )
