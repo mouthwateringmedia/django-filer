@@ -37,7 +37,7 @@ var PROJECT_PATTERNS = {
 // #############################################################################
 // sass
 gulp.task("sass", function() {
-  gulp
+  return gulp
     .src(PROJECT_PATTERNS.sass)
     .pipe(sourcemaps.init())
     .pipe(sass({ outputStyle: "compressed" }).on("error", sass.logError))
@@ -57,14 +57,14 @@ gulp.task("sass", function() {
 });
 
 gulp.task("sass:watch", function() {
-  gulp.watch(PROJECT_PATTERNS.sass, ["sass"]);
+  gulp.watch(PROJECT_PATTERNS.sass, gulp.series("sass"));
 });
 
 // #############################################################################
 // Icons
 
 gulp.task("icons", function() {
-  gulp
+  return gulp
     .src(PROJECT_PATTERNS.icons)
     .pipe(
       iconfontCss({
@@ -130,12 +130,12 @@ gulp.task("tests:watch", function() {
 // TASKS
 gulp.task("js", gulp.series("jshint", "jscs", "tests:unit"));
 gulp.task("js:watch", function() {
-  gulp.watch(PROJECT_PATTERNS.lint, ["js"]);
+  gulp.watch(PROJECT_PATTERNS.lint, gulp.series("js"));
 });
 gulp.task("watch", gulp.series("sass:watch", "js:watch"));
 gulp.task("lint", gulp.series("jscs", "jshint"));
 gulp.task("lint:watch", function() {
-  gulp.watch(PROJECT_PATTERNS.lint, ["lint"]);
+  gulp.watch(PROJECT_PATTERNS.lint, gulp.series("lint"));
 });
 gulp.task("ci", gulp.series("js"));
 gulp.task("default", gulp.series("sass", "sass:watch", "js", "js:watch"));
