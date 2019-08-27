@@ -48,8 +48,8 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
             (_('Advanced'), {
                 'fields': (
                     'file',
-                    'sha1',
-                    'display_canonical',
+                    # 'sha1',
+                    # 'display_canonical',
                 ) + extra_advanced_fields,
                 'classes': ('collapse',),
             }),
