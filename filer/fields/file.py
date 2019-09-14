@@ -86,7 +86,7 @@ class AdminFileWidget(ForeignKeyRawIdWidget):
             'all': [
                 'filer/css/admin_filer.css',
             ]
-        }p
+        }
         js = (
             'filer/js/libs/dropzone.min.js',
             'filer/js/addons/dropzone.init.js',
